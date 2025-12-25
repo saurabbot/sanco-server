@@ -4,6 +4,7 @@ from redis.asyncio import Redis
 
 from app import schemas
 from app.core.redis import get_redis
+from app.services.chatbot import chatbot_service
 from app.services.chat_memory import ChatMemoryService
 
 router = APIRouter()
@@ -22,13 +23,11 @@ async def chat_with_bot(
     # 2. Add user message to memory
     await memory.add_message(client_ip, "user", request_data.message)
     
-    # 3. Retrieve context window for the LLM
+    # Retrieve context window for the LLM from Redis
     history = await memory.get_messages(client_ip)
     
-    # --- PROMPT LLM HERE ---
-    # In a real app, you'd pass 'history' to OpenAI/Anthropic/Local LLM
-    bot_response = f"Echo: You have {len(history)} messages in context. Your last was: {request_data.message}"
-    # -----------------------
+    # Use ChatBotService with RAG
+    bot_response = await chatbot_service.get_answer(request_data.message, history)
     
     # 4. Add bot response to memory
     await memory.add_message(client_ip, "assistant", bot_response)
