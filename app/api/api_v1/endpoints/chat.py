@@ -14,10 +14,6 @@ async def chat_with_bot(
     request: Request,
     redis: Redis = Depends(get_redis)
 ) -> Any:
-    """
-    Chat endpoint that uses IP address for memory mapping.
-    Scalable: Uses Redis lists with a rolling window.
-    """
     # 1. Identify user (Scalable: using IP or Session Header)
     client_ip = request.client.host
     

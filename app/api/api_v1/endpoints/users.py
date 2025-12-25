@@ -13,9 +13,6 @@ async def read_users(
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
-    """
-    Retrieve users.
-    """
     users = await crud.user.get_multi(db, skip=skip, limit=limit)
     return users
 
@@ -25,9 +22,6 @@ async def create_user(
     db: AsyncSession = Depends(get_db),
     user_in: schemas.UserCreate,
 ) -> Any:
-    """
-    Create new user.
-    """
     user = await crud.user.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(

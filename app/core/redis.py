@@ -9,5 +9,4 @@ redis_pool = redis.ConnectionPool.from_url(
 )
 
 def get_redis():
-    """Dependency for FastAPI to get a Redis connection."""
     return redis.Redis(connection_pool=redis_pool)
