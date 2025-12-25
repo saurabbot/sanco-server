@@ -4,13 +4,14 @@ This is an extremely scalable FastAPI boilerplate designed for production-ready 
 
 ## Key Features
 
+- **Redis Chat Memory**: High-performance, IP-based rolling window memory for chatbots.
 - **FastAPI**: Modern, fast (high-performance) web framework.
 - **SQLAlchemy 2.0 (Async)**: Modern async ORM for database interactions.
 - **Alembic**: Database migration management.
 - **Pydantic V2**: Fast data validation and core settings management.
 - **PostgreSQL**: Robust relational database.
+- **Redis**: In-memory data store for sessions and hot context.
 - **Docker & Docker Compose**: Containerized development and deployment.
-- **JWT Authentication**: Secure token-based authentication (ready to implement).
 - **Scalable Structure**: Modular architecture (API, Core, DB, Models, Schemas, Services).
 
 ## Project Structure

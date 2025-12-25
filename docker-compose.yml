@@ -10,7 +10,14 @@ services:
     environment:
       - POSTGRES_SERVER=db
     ports:
-      - "5432:5432"
+      - "5433:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   app:
     build: .
@@ -22,8 +29,10 @@ services:
       - .env
     environment:
       - POSTGRES_SERVER=db
+      - POSTGRES_PORT=5432
     depends_on:
       - db
 
 volumes:
   postgres_data:
+  redis_data:

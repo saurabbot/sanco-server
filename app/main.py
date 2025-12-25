@@ -23,4 +23,11 @@ if settings.BACKEND_CORS_ORIGINS:
 def health_check():
     return {"status": "ok"}
 
+@app.on_event("startup")
+async def startup_event():
+    print(f"🚀 {settings.PROJECT_NAME} is starting up...")
+    # Strip asyncpg for Beekeeper compatibility
+    db_url = str(settings.SQLALCHEMY_DATABASE_URI).replace("+asyncpg", "")
+    print(f"💾 Database URL (Beekeeper): {db_url}")
+
 app.include_router(api_router, prefix=settings.API_V1_STR)

@@ -10,14 +10,18 @@ import os
 db_server = os.getenv("POSTGRES_SERVER", "db")
 db_port = int(os.getenv("POSTGRES_PORT", 5432))
 
-while True:
-    try:
-        with socket.create_connection((db_server, db_port), timeout=1):
-            print("Database is ready!")
-            break
-    except (socket.error, socket.timeout):
-        print("Waiting for database...")
-        time.sleep(1)
+redis_host = os.getenv("REDIS_HOST", "redis")
+redis_port = int(os.getenv("REDIS_PORT", 6379))
+
+for name, host, port in [("PostgreSQL", db_server, db_port), ("Redis", redis_host, redis_port)]:
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=1):
+                print(f"{name} is ready!")
+                break
+        except (socket.error, socket.timeout):
+            print(f"Waiting for {name}...")
+            time.sleep(1)
 END
 
 # Run migrations
