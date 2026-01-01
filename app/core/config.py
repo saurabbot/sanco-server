@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: Annotated[
         List[AnyHttpUrl], BeforeValidator(lambda v: json.loads(v) if isinstance(v, str) else v)
-    ] = []
+    ] = [AnyHttpUrl("http://localhost:5173"), AnyHttpUrl("http://localhost:8000"), AnyHttpUrl("http://localhost:3000")]
 
     # Database
     POSTGRES_SERVER: str

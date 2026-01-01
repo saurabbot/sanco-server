@@ -33,12 +33,26 @@ app/
 
 ### 1. Environment Setup
 
-Copy `.env.example` to `.env` and update the values:
-```bash
-cp .env.example .env
+Create a `.env` file in the `sanco_server` directory with the following variables:
+
+```env
+PROJECT_NAME="Sanco Server"
+SECRET_KEY="your-super-secret-key"
+OPENAI_API_KEY="sk-..."
+
+POSTGRES_SERVER=localhost
+POSTGRES_PORT=5433
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=app
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
 ```
 
-### 2. Run with Docker
+### 2. Run with Docker (Full Stack)
+
+This will start the DB, Redis, and the FastAPI app in containers:
 
 ```bash
 docker-compose up --build
@@ -46,16 +60,47 @@ docker-compose up --build
 
 The API will be available at `http://localhost:8000/docs`.
 
-### 3. Database Migrations
+### 3. Local Development (Hybrid)
+
+For faster development with hot-reload, run the dependencies in Docker and the app locally:
+
+```bash
+# Start DB and Redis
+docker-compose up -d db redis
+
+# Install dependencies
+poetry install
+
+# Run migrations
+PYTHONPATH=. poetry run alembic upgrade head
+
+# Start the server
+PYTHONPATH=. poetry run uvicorn app.main:app --reload
+```
+
+Or use the provided Makefile:
+```bash
+make run-local
+```
+
+## Database Migrations
 
 Generate a new migration:
 ```bash
-docker-compose exec app alembic revision --autogenerate -m "Initial migration"
+# If running in Docker
+docker-compose exec app alembic revision --autogenerate -m "description"
+
+# If running locally
+PYTHONPATH=. poetry run alembic revision --autogenerate -m "description"
 ```
 
 Apply migrations:
 ```bash
+# If running in Docker
 docker-compose exec app alembic upgrade head
+
+# If running locally
+PYTHONPATH=. poetry run alembic upgrade head
 ```
 
 ## Best Practices Implemented
