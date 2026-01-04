@@ -52,4 +52,9 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
+    @computed_field
+    @property
+    def ASYNC_DATABASE_URI(self) -> str:
+        return str(self.SQLALCHEMY_DATABASE_URI).replace("postgresql+asyncpg://", "postgresql://")
+
 settings = Settings()

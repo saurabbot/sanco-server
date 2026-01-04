@@ -110,3 +110,8 @@ PYTHONPATH=. poetry run alembic upgrade head
 - **Computed Config**: Database URIs are built dynamically from environment variables.
 - **Type Safety**: Extensive use of Python type hints and Pydantic validation.
 - **Structure**: Separation of concerns between Models (DB), Schemas (API), and Logic (Services).
+
+
+poetry run alembic revision --autogenerate -m "Your description"
+poetry run alembic upgrade head
+POSTGRES_SERVER=localhost POSTGRES_PORT=5433 poetry run alembic revision --autogenerate -m "Add Message table"

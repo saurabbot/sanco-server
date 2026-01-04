@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
 from app.core.config import settings
+from app.db import base  # noqa: F401
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -10,9 +11,26 @@ app = FastAPI(
 )
 
 # Set all CORS enabled origins
+# We must be extremely explicit when allow_credentials=True
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# Add origins from settings if they aren't already there
+for origin in settings.BACKEND_CORS_ORIGINS:
+    origin_str = str(origin).rstrip("/")
+    if origin_str not in origins:
+        origins.append(origin_str)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

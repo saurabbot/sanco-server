@@ -14,12 +14,10 @@ class ChatMemoryService:
     async def add_message(self, identifier: str, role: str, content: str):
         key = self._get_key(identifier)
         message = json.dumps({"role": role, "content": content})
-        
-        # Use a transaction-like pipeline for atomic operations
         async with self.redis.pipeline(transaction=True) as pipe:
-            pipe.rpush(key, message)      # Append new message
-            pipe.ltrim(key, -self.window_size, -1)  # Keep only the last N
-            pipe.expire(key, self.ttl)    # Refresh TTL
+            pipe.rpush(key, message)
+            pipe.ltrim(key, -self.window_size, -1)
+            pipe.expire(key, self.ttl)
             await pipe.execute()
 
     async def get_messages(self, identifier: str) -> List[Dict[str, str]]:

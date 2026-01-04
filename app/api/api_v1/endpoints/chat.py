@@ -1,45 +1,58 @@
-from typing import Any
-from fastapi import APIRouter, Depends, Request
+from typing import Any, List
+from fastapi import APIRouter, Depends, Request, Response
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
 from app.core.redis import get_redis
-from app.services.chatbot import chatbot_service
-from app.services.chat_memory import ChatMemoryService
+from app.db.session import get_db
+from app.services.chat_service import ChatService
 
 router = APIRouter()
 
+@router.get("/messages", response_model=List[dict])
+async def get_chat_history(
+    request: Request,
+    response: Response,
+    redis: Redis = Depends(get_redis),
+    db: AsyncSession = Depends(get_db),
+) -> Any:
+    chat_service = ChatService(db, redis)
+    session, _ = await chat_service.resolve_session(request, response)
+    return await chat_service.get_history(session)
+
+
 @router.post("/message", response_model=schemas.ChatResponse)
+@router.post("/messages", response_model=schemas.ChatResponse, include_in_schema=False)
 async def chat_with_bot(
     request_data: schemas.ChatRequest,
     request: Request,
-    redis: Redis = Depends(get_redis)
+    response: Response,
+    redis: Redis = Depends(get_redis),
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
-    # 1. Identify user (Scalable: using IP or Session Header)
-    client_ip = request.client.host
+    chat_service = ChatService(db, redis)
     
-    memory = ChatMemoryService(redis)
+    # 1. Resolve session from Body, Cookie, or Header
+    session_uuid_input = request_data.session_uuid or request_data.sessionuuid
+    session, session_uuid = await chat_service.resolve_session(request, response, session_uuid_input)
     
-    # 2. Add user message to memory
-    await memory.add_message(client_ip, "user", request_data.message)
-    
-    # Retrieve context window for the LLM from Redis
-    history = await memory.get_messages(client_ip)
-    
-    # Use ChatBotService with RAG
-    bot_response = await chatbot_service.get_answer(request_data.message, history)
-    
-    # 4. Add bot response to memory
-    await memory.add_message(client_ip, "assistant", bot_response)
-    
-    return {
-        "response": bot_response,
-        "context_length": len(history) + 1
-    }
+    # 2. Process chat
+    return await chat_service.chat(session, session_uuid, request_data.message)
+
 
 @router.delete("/clear")
-async def clear_chat(request: Request, redis: Redis = Depends(get_redis)):
-    client_ip = request.client.host
-    memory = ChatMemoryService(redis)
-    await memory.clear_memory(client_ip)
-    return {"status": "cleared", "ip": client_ip}
+async def clear_chat(
+    request: Request, 
+    response: Response, 
+    redis: Redis = Depends(get_redis),
+    db: AsyncSession = Depends(get_db),
+):
+    chat_service = ChatService(db, redis)
+    _, session_uuid = await chat_service.resolve_session(request, response)
+    
+    if session_uuid:
+        await chat_service.clear_chat(session_uuid)
+    
+    response.delete_cookie(ChatService.SESSION_COOKIE_NAME, path="/")
+    return {"status": "cleared", "session_uuid": session_uuid}
