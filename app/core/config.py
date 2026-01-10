@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     REDIS_PASSWORD: Optional[str] = None
 
+    # LiveKit
+    LIVEKIT_API_KEY: Optional[str] = None
+    LIVEKIT_API_SECRET: Optional[str] = None
+    LIVEKIT_URL: Optional[str] = None
+    LIVEKIT_AGENT_NAME: str = "context-agent"
+
     @computed_field
     @property
     def REDIS_URL(self) -> str:
