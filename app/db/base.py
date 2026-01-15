@@ -8,3 +8,5 @@ from app.models.chat_session import ChatSession  # noqa
 from app.models.chat_feedback import ChatFeedback  # noqa
 from app.models.analytics_event import AnalyticsEvent  # noqa
 from app.models.transcriptions import Transcription  # noqa
+from app.models.services import Services  # noqa
+from app.models.service_media import ServiceMedia  # noqa

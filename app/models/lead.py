@@ -15,3 +15,4 @@ class Lead(Base):
     updated_at = Column(DateTime, default=datetime.now)
 
     session = relationship("ChatSession", back_populates="leads")
+
